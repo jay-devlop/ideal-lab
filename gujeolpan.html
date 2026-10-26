@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이상형 구절판 만들기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:#111;font-family:'Noto Sans KR',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:48px 16px}
+h1{font-size:28px;font-weight:700;margin:0 0 8px;letter-spacing:-0.02em;text-align:center}
+.sub{color:#777;font-size:14px;margin:0 0 32px;text-align:center;line-height:1.7}
+.board{width:min(92vw,676px);aspect-ratio:1;margin:8px 0 28px}
+.board svg{width:100%;height:100%;display:block;overflow:visible}
+.cell{cursor:pointer;touch-action:none}
+.cell .bg{fill:#fff}
+.cell:hover .bg{fill:#f2f2f2}
+.bar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:center;width:min(92vw,676px)}
+.status{font-size:13px;color:#555;width:100%;text-align:center}
+button{font-family:inherit;font-size:13px;background:#fff;color:#111;border:1px solid #111;padding:9px 16px;cursor:pointer}
+button:hover{background:#eee}
+button:focus-visible{outline:2px solid #888;outline-offset:2px}
+.zoom{display:flex;align-items:center;gap:10px;font-size:13px;color:#555}
+.zoom input{width:180px;accent-color:#111}
+.zoom input:disabled{opacity:.35}
+</style>
+</head>
+<body>
+<h1>이상형 구절판 만들기</h1>
+<p class="sub">칸을 클릭해서 사진을 고르거나, 이미지를 복사한 뒤 Ctrl+V(⌘+V)로 붙여넣으세요.<br>파일을 칸 위로 끌어다 놓아도 됩니다.<br>사진을 넣은 뒤에는 드래그로 위치를, 마우스 휠이나 슬라이더로 크기를 조절할 수 있습니다.</p>
+<div class="board"><svg id="board" viewBox="0 0 676 676"></svg></div>
+<div class="bar">
+  <div class="status" id="status"></div>
+  <button id="pick">사진 선택</button>
+  <label class="zoom">크기 <input type="range" id="zoom" min="1" max="4" step="0.01" value="1" disabled></label>
+</div>
+<input type="file" id="file" accept="image/*" multiple hidden>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const SIZE = 676;
+const POLYS = [
+  [[0,0],[198,0],[272,181],[181,272],[0,197]],
+  [[198,0],[478,0],[404,181],[272,181]],
+  [[478,0],[676,0],[676,197],[495,272],[404,181]],
+  [[0,197],[181,272],[181,404],[0,479]],
+  [[272,181],[404,181],[495,272],[495,404],[404,495],[272,495],[181,404],[181,272]],
+  [[676,197],[676,479],[495,404],[495,272]],
+  [[0,479],[181,404],[272,495],[198,676],[0,676]],
+  [[272,495],[404,495],[478,676],[198,676]],
+  [[495,404],[676,479],[676,676],[478,676],[404,495]]
+];
+
+const svg = document.getElementById('board');
+const fileInput = document.getElementById('file');
+const statusEl = document.getElementById('status');
+const zoomInput = document.getElementById('zoom');
+const urls = Array(9).fill(null);
+const st = Array(9).fill(null);
+let sel = 0;
+let drag = null;
+
+function el(name, attrs, parent) {
+  const e = document.createElementNS(NS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+const toPoints = pts => pts.map(p => p.join(',')).join(' ');
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+const cells = POLYS.map(pts => {
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x = Math.min(...xs), y = Math.min(...ys);
+  const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+  let a = 0, cx = 0, cy = 0;
+  for (let k = 0; k < pts.length; k++) {
+    const [x0, y0] = pts[k], [x1, y1] = pts[(k + 1) % pts.length];
+    const c = x0 * y1 - x1 * y0;
+    a += c; cx += (x0 + x1) * c; cy += (y0 + y1) * c;
+  }
+  a /= 2; cx /= 6 * a; cy /= 6 * a;
+  const bx = cx + 0.6 * (pts[0][0] - cx);
+  const by = cy + 0.6 * (pts[0][1] - cy);
+  return { pts, x, y, w, h, cx, cy, bx, by };
+});
+
+const defs = el('defs', {}, svg);
+const parts = [];
+
+cells.forEach((c, i) => {
+  const cp = el('clipPath', { id: 'clip' + i }, defs);
+  el('polygon', { points: toPoints(c.pts) }, cp);
+
+  const g = el('g', { class: 'cell' }, svg);
+  el('polygon', { class: 'bg', points: toPoints(c.pts) }, g);
+
+  const img = el('image', {
+    x: c.x, y: c.y, width: c.w, height: c.h,
+    preserveAspectRatio: 'none',
+    'clip-path': 'url(#clip' + i + ')'
+  }, g);
+  img.style.display = 'none';
+
+  const badge = el('g', { transform: 'translate(' + c.cx + ',' + c.cy + ')' }, g);
+  el('circle', { r: 16, fill: '#fff', stroke: '#111', 'stroke-width': 1 }, badge);
+  const t = el('text', {
+    'text-anchor': 'middle', dy: '0.35em', 'font-size': 17,
+    'font-weight': 700, fill: '#111', 'font-family': 'Noto Sans KR, sans-serif'
+  }, badge);
+  t.textContent = i + 1;
+
+  g.addEventListener('pointerdown', e => {
+    select(i);
+    if (!urls[i] || !st[i]) return;
+    g.setPointerCapture(e.pointerId);
+    drag = { i, x: e.clientX, y: e.clientY, ox: st[i].ox, oy: st[i].oy, k: svg.getScreenCTM().a };
+    g.style.cursor = 'grabbing';
+  });
+  g.addEventListener('pointermove', e => {
+    if (!drag || drag.i !== i) return;
+    st[i].ox = drag.ox + (e.clientX - drag.x) / drag.k;
+    st[i].oy = drag.oy + (e.clientY - drag.y) / drag.k;
+    apply(i);
+  });
+  const endDrag = () => {
+    drag = null;
+    g.style.cursor = urls[i] ? 'grab' : 'pointer';
+  };
+  g.addEventListener('pointerup', endDrag);
+  g.addEventListener('pointercancel', endDrag);
+  g.addEventListener('click', () => {
+    if (!urls[i]) fileInput.click();
+  });
+  g.addEventListener('dragover', e => e.preventDefault());
+  g.addEventListener('drop', e => {
+    e.preventDefault();
+    select(i);
+    addFiles([...e.dataTransfer.files], i);
+  });
+  g.addEventListener('wheel', e => {
+    if (!urls[i] || !st[i]) return;
+    e.preventDefault();
+    select(i);
+    st[i].zoom = clamp(st[i].zoom * (e.deltaY < 0 ? 1.08 : 1 / 1.08), 1, 4);
+    apply(i);
+    zoomInput.value = st[i].zoom;
+  }, { passive: false });
+
+  parts.push({ g, img, badge });
+});
+
+cells.forEach(c => {
+  el('polygon', {
+    points: toPoints(c.pts), fill: 'none', stroke: '#111', 'stroke-width': 1,
+    'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke', 'pointer-events': 'none'
+  }, svg);
+});
+
+el('rect', {
+  x: 0, y: 0, width: SIZE, height: SIZE, fill: 'none', stroke: '#111',
+  'stroke-width': 1.5, 'vector-effect': 'non-scaling-stroke', 'pointer-events': 'none'
+}, svg);
+
+const selPoly = el('polygon', {
+  fill: 'none', stroke: '#111', 'stroke-width': 3, 'stroke-linejoin': 'round',
+  'vector-effect': 'non-scaling-stroke', 'pointer-events': 'none'
+}, svg);
+
+function updateStatus() {
+  const n = urls.filter(Boolean).length;
+  statusEl.textContent = (sel + 1) + '번 칸 선택됨 · ' + n + ' / 9 채움';
+}
+
+function syncZoom() {
+  const ready = !!(urls[sel] && st[sel]);
+  zoomInput.disabled = !ready;
+  zoomInput.value = ready ? st[sel].zoom : 1;
+}
+
+function select(i) {
+  sel = i;
+  selPoly.setAttribute('points', toPoints(cells[i].pts));
+  updateStatus();
+  syncZoom();
+}
+
+function apply(i) {
+  const c = cells[i], s = st[i], img = parts[i].img;
+  const base = Math.max(c.w / s.nw, c.h / s.nh) * s.zoom;
+  const w = s.nw * base, h = s.nh * base;
+  const mx = (w - c.w) / 2, my = (h - c.h) / 2;
+  s.ox = clamp(s.ox, -mx, mx);
+  s.oy = clamp(s.oy, -my, my);
+  img.setAttribute('x', c.x + c.w / 2 + s.ox - w / 2);
+  img.setAttribute('y', c.y + c.h / 2 + s.oy - h / 2);
+  img.setAttribute('width', w);
+  img.setAttribute('height', h);
+}
+
+function setImage(i, url) {
+  if (urls[i]) URL.revokeObjectURL(urls[i]);
+  urls[i] = url;
+  st[i] = null;
+  const p = parts[i], c = cells[i];
+  p.badge.setAttribute('transform', 'translate(' + c.bx + ',' + c.by + ')');
+  p.g.style.cursor = 'grab';
+  const im = new Image();
+  im.onload = () => {
+    if (urls[i] !== url) return;
+    st[i] = { nw: im.naturalWidth, nh: im.naturalHeight, zoom: 1, ox: 0, oy: 0 };
+    p.img.setAttribute('href', url);
+    p.img.style.display = '';
+    apply(i);
+    syncZoom();
+  };
+  im.src = url;
+  updateStatus();
+}
+
+function nextEmpty(from) {
+  for (let k = 1; k <= 9; k++) {
+    const j = (from + k) % 9;
+    if (!urls[j]) return j;
+  }
+  return -1;
+}
+
+function addFiles(files, start) {
+  const imgs = files.filter(f => f && f.type.startsWith('image/'));
+  if (!imgs.length) return;
+  let cur = start;
+  imgs.forEach((f, k) => {
+    if (k > 0) {
+      const n = nextEmpty(cur);
+      if (n < 0) return;
+      cur = n;
+    }
+    setImage(cur, URL.createObjectURL(f));
+  });
+  const n = nextEmpty(cur);
+  select(n >= 0 ? n : cur);
+}
+
+fileInput.addEventListener('change', () => {
+  addFiles([...fileInput.files], sel);
+  fileInput.value = '';
+});
+
+document.addEventListener('paste', e => {
+  const items = [...(e.clipboardData ? e.clipboardData.items : [])];
+  const files = items.filter(it => it.type.startsWith('image/')).map(it => it.getAsFile());
+  if (!files.length) return;
+  e.preventDefault();
+  addFiles(files, sel);
+});
+
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => e.preventDefault());
+
+zoomInput.addEventListener('input', () => {
+  if (!st[sel]) return;
+  st[sel].zoom = parseFloat(zoomInput.value);
+  apply(sel);
+});
+
+document.getElementById('pick').addEventListener('click', () => fileInput.click());
+
+select(0);
+</script>
+</body>
+</html>
