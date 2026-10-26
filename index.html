@@ -7,32 +7,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#fff;color:#111;font-family:'Noto Sans KR',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:48px 16px}
-h1{font-size:28px;font-weight:700;margin:0 0 8px;letter-spacing:-0.02em;text-align:center}
-.sub{color:#777;font-size:14px;margin:0 0 32px;text-align:center;line-height:1.7}
-.board{width:min(92vw,676px);aspect-ratio:1;margin:8px 0 28px}
+body{margin:0;background:#fff;color:#111;font-family:'Noto Sans KR',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px;height:100vh;overflow:hidden}
+h1{font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-0.02em;text-align:center}
+.sub{color:#777;font-size:12px;margin:0 0 10px;text-align:center;line-height:1.5}
+.board{--s:min(92vw,calc(100vh - 190px),560px);width:var(--s);height:var(--s);margin:4px 0 12px;flex:none}
 .board svg{width:100%;height:100%;display:block;overflow:visible}
 .cell{cursor:pointer;touch-action:none}
 .cell .bg{fill:#fff}
 .cell:hover .bg{fill:#f2f2f2}
-.bar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:center;width:min(92vw,676px)}
+.bar{--s:min(92vw,560px);display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:center;width:var(--s,min(92vw,560px))}
 .status{font-size:13px;color:#555;width:100%;text-align:center}
-button{font-family:inherit;font-size:13px;background:#fff;color:#111;border:1px solid #111;padding:9px 16px;cursor:pointer}
+button{font-family:inherit;font-size:12px;background:#fff;color:#111;border:1px solid #111;padding:7px 14px;cursor:pointer}
 button:hover{background:#eee}
 button:focus-visible{outline:2px solid #888;outline-offset:2px}
-.zoom{display:flex;align-items:center;gap:10px;font-size:13px;color:#555}
-.zoom input{width:180px;accent-color:#111}
-.zoom input:disabled{opacity:.35}
 </style>
 </head>
 <body>
 <h1>이상형 구절판 만들기</h1>
-<p class="sub">칸을 클릭해서 사진을 고르거나, 이미지를 복사한 뒤 Ctrl+V(⌘+V)로 붙여넣으세요.<br>파일을 칸 위로 끌어다 놓아도 됩니다.<br>사진을 넣은 뒤에는 드래그로 위치를, 마우스 휠이나 슬라이더로 크기를 조절할 수 있습니다.</p>
+<p class="sub">번호를 클릭해 선택하고, 한 번 더 클릭하면 사진을 고릅니다. 붙여넣기(⌘+V)·파일 끌어놓기도 가능해요.<br>사진: 드래그로 위치, 휠로 크기, 꾹 누른 뒤 끌면 다른 번호로 이동, Delete로 삭제</p>
 <div class="board"><svg id="board" viewBox="0 0 676 676"></svg></div>
 <div class="bar">
   <div class="status" id="status"></div>
-  <button id="pick">사진 선택</button>
-  <label class="zoom">크기 <input type="range" id="zoom" min="1" max="4" step="0.01" value="1" disabled></label>
+  <button id="pick">사진 업로드</button>
+  <button id="save">구절판 저장</button>
 </div>
 <input type="file" id="file" accept="image/*" multiple hidden>
 <script>
@@ -53,11 +50,11 @@ const POLYS = [
 const svg = document.getElementById('board');
 const fileInput = document.getElementById('file');
 const statusEl = document.getElementById('status');
-const zoomInput = document.getElementById('zoom');
 const urls = Array(9).fill(null);
 const st = Array(9).fill(null);
 let sel = 0;
 let drag = null;
+let wasSel = false;
 
 function el(name, attrs, parent) {
   const e = document.createElementNS(NS, name);
@@ -80,9 +77,7 @@ const cells = POLYS.map(pts => {
     a += c; cx += (x0 + x1) * c; cy += (y0 + y1) * c;
   }
   a /= 2; cx /= 6 * a; cy /= 6 * a;
-  const bx = cx + 0.6 * (pts[0][0] - cx);
-  const by = cy + 0.6 * (pts[0][1] - cy);
-  return { pts, x, y, w, h, cx, cy, bx, by };
+  return { pts, x, y, w, h, cx, cy };
 });
 
 const defs = el('defs', {}, svg);
@@ -109,28 +104,63 @@ cells.forEach((c, i) => {
     'font-weight': 700, fill: '#111', 'font-family': 'Noto Sans KR, sans-serif'
   }, badge);
   t.textContent = i + 1;
+  if (i === 4) {
+    const lb = el('text', {
+      'text-anchor': 'middle', y: 32, 'font-size': 11,
+      'font-weight': 700, fill: '#999', 'font-family': 'Noto Sans KR, sans-serif'
+    }, badge);
+    lb.textContent = '최애';
+  }
+  g.dataset.i = i;
 
   g.addEventListener('pointerdown', e => {
+    wasSel = sel === i;
     select(i);
     if (!urls[i] || !st[i]) return;
     g.setPointerCapture(e.pointerId);
-    drag = { i, x: e.clientX, y: e.clientY, ox: st[i].ox, oy: st[i].oy, k: svg.getScreenCTM().a };
-    g.style.cursor = 'grabbing';
+    drag = { i, x: e.clientX, y: e.clientY, ox: st[i].ox, oy: st[i].oy, k: svg.getScreenCTM().a, moved: false, lifting: false, target: i };
+    drag.timer = setTimeout(() => {
+      if (!drag || drag.moved) return;
+      drag.lifting = true;
+      g.style.opacity = '.5';
+      g.style.cursor = 'grabbing';
+    }, 450);
   });
   g.addEventListener('pointermove', e => {
     if (!drag || drag.i !== i) return;
-    st[i].ox = drag.ox + (e.clientX - drag.x) / drag.k;
-    st[i].oy = drag.oy + (e.clientY - drag.y) / drag.k;
+    if (drag.lifting) {
+      const t = document.elementFromPoint(e.clientX, e.clientY);
+      const tg = t && t.closest ? t.closest('.cell') : null;
+      if (tg) {
+        drag.target = +tg.dataset.i;
+        select(drag.target);
+      }
+      return;
+    }
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) > 6) {
+      drag.moved = true;
+      clearTimeout(drag.timer);
+    }
+    if (!drag.moved) return;
+    st[i].ox = drag.ox + dx / drag.k;
+    st[i].oy = drag.oy + dy / drag.k;
     apply(i);
   });
-  const endDrag = () => {
+  const endDrag = e => {
+    if (drag && drag.i === i) {
+      clearTimeout(drag.timer);
+      if (drag.lifting && e.type === 'pointerup' && drag.target !== i) swapCells(i, drag.target);
+      else if (drag.lifting) select(i);
+    }
     drag = null;
+    g.style.opacity = '';
     g.style.cursor = urls[i] ? 'grab' : 'pointer';
   };
   g.addEventListener('pointerup', endDrag);
   g.addEventListener('pointercancel', endDrag);
   g.addEventListener('click', () => {
-    if (!urls[i]) fileInput.click();
+    if (!urls[i] && wasSel) fileInput.click();
   });
   g.addEventListener('dragover', e => e.preventDefault());
   g.addEventListener('drop', e => {
@@ -144,10 +174,10 @@ cells.forEach((c, i) => {
     select(i);
     st[i].zoom = clamp(st[i].zoom * (e.deltaY < 0 ? 1.08 : 1 / 1.08), 1, 4);
     apply(i);
-    zoomInput.value = st[i].zoom;
   }, { passive: false });
 
   parts.push({ g, img, badge });
+  g.style.cursor = 'pointer';
 });
 
 cells.forEach(c => {
@@ -172,17 +202,10 @@ function updateStatus() {
   statusEl.textContent = (sel + 1) + '번 칸 선택됨 · ' + n + ' / 9 채움';
 }
 
-function syncZoom() {
-  const ready = !!(urls[sel] && st[sel]);
-  zoomInput.disabled = !ready;
-  zoomInput.value = ready ? st[sel].zoom : 1;
-}
-
 function select(i) {
   sel = i;
   selPoly.setAttribute('points', toPoints(cells[i].pts));
   updateStatus();
-  syncZoom();
 }
 
 function apply(i) {
@@ -198,21 +221,47 @@ function apply(i) {
   img.setAttribute('height', h);
 }
 
+function render(i) {
+  const p = parts[i];
+  const has = !!(urls[i] && st[i]);
+  if (has) {
+    p.img.setAttribute('href', urls[i]);
+    p.img.style.display = '';
+    apply(i);
+  } else {
+    p.img.style.display = 'none';
+  }
+  p.badge.style.display = urls[i] ? 'none' : '';
+  p.g.style.cursor = urls[i] ? 'grab' : 'pointer';
+}
+
+function swapCells(a, b) {
+  [urls[a], urls[b]] = [urls[b], urls[a]];
+  [st[a], st[b]] = [st[b], st[a]];
+  render(a);
+  render(b);
+  select(b);
+}
+
+function removeImage(i) {
+  if (!urls[i]) return;
+  URL.revokeObjectURL(urls[i]);
+  urls[i] = null;
+  st[i] = null;
+  render(i);
+  select(i);
+}
+
 function setImage(i, url) {
   if (urls[i]) URL.revokeObjectURL(urls[i]);
   urls[i] = url;
   st[i] = null;
-  const p = parts[i], c = cells[i];
-  p.badge.setAttribute('transform', 'translate(' + c.bx + ',' + c.by + ')');
-  p.g.style.cursor = 'grab';
+  render(i);
   const im = new Image();
   im.onload = () => {
     if (urls[i] !== url) return;
     st[i] = { nw: im.naturalWidth, nh: im.naturalHeight, zoom: 1, ox: 0, oy: 0 };
-    p.img.setAttribute('href', url);
-    p.img.style.display = '';
-    apply(i);
-    syncZoom();
+    render(i);
   };
   im.src = url;
   updateStatus();
@@ -258,10 +307,49 @@ document.addEventListener('paste', e => {
 window.addEventListener('dragover', e => e.preventDefault());
 window.addEventListener('drop', e => e.preventDefault());
 
-zoomInput.addEventListener('input', () => {
-  if (!st[sel]) return;
-  st[sel].zoom = parseFloat(zoomInput.value);
-  apply(sel);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    e.preventDefault();
+    removeImage(sel);
+  }
+});
+
+document.getElementById('save').addEventListener('click', async () => {
+  const R = 2, cv = document.createElement('canvas');
+  cv.width = cv.height = SIZE * R;
+  const ctx = cv.getContext('2d');
+  ctx.scale(R, R);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, SIZE, SIZE);
+  const path = pts => {
+    ctx.beginPath();
+    pts.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+    ctx.closePath();
+  };
+  const loaded = await Promise.all(urls.map(u => u ? new Promise(r => { const e = new Image(); e.onload = () => r(e); e.onerror = () => r(null); e.src = u; }) : null));
+  cells.forEach((c, i) => {
+    if (!loaded[i] || !st[i]) return;
+    const im = parts[i].img;
+    ctx.save();
+    path(c.pts);
+    ctx.clip();
+    ctx.drawImage(loaded[i],
+      +im.getAttribute('x'), +im.getAttribute('y'), +im.getAttribute('width'), +im.getAttribute('height'));
+    ctx.restore();
+  });
+  ctx.strokeStyle = '#111';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 1;
+  cells.forEach(c => { path(c.pts); ctx.stroke(); });
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(0.75, 0.75, SIZE - 1.5, SIZE - 1.5);
+  cv.toBlob(b => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = '이상형-구절판.png';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }, 'image/png');
 });
 
 document.getElementById('pick').addEventListener('click', () => fileInput.click());
