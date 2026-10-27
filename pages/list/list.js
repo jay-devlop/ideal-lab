@@ -4,7 +4,6 @@ let ideals = [];
 try { ideals = JSON.parse(localStorage.getItem(LKEY)) || []; } catch (e) {}
 const listEl = document.getElementById('list');
 const listEmpty = document.getElementById('listEmpty');
-const confirmEl = document.getElementById('confirm');
 let editing = -1;
 let flashIdx = -1;
 
@@ -39,13 +38,6 @@ function loadIdeals() {
       }
     })
     .catch(() => {});
-}
-
-function mk(tag, cls, text) {
-  const e = document.createElement(tag);
-  if (cls) e.className = cls;
-  if (text != null) e.textContent = text;
-  return e;
 }
 
 function renderList() {
@@ -91,16 +83,15 @@ function renderList() {
 }
 
 function askDelete(k) {
-  confirmEl.hidden = false;
-  document.getElementById('cYes').onclick = () => {
-    ideals.splice(k, 1);
-    saveIdeals();
-    confirmEl.hidden = true;
-    renderList();
-  };
+  showPopup({
+    title: '삭제하시겠습니까?',
+    note: '복구가 되지 않습니다.',
+    buttons: [
+      { label: '취소' },
+      { label: '삭제', danger: true, onClick: () => { ideals.splice(k, 1); saveIdeals(); renderList(); } }
+    ]
+  });
 }
-document.getElementById('cNo').addEventListener('click', () => { confirmEl.hidden = true; });
-confirmEl.addEventListener('click', e => { if (e.target === confirmEl) confirmEl.hidden = true; });
 
 function addIdeals(arr) {
   arr.forEach(t => { if (t && !ideals.includes(t)) ideals.push(t); });
@@ -120,7 +111,21 @@ function addIdealsStaggered(arr) {
   }, 400 + i * 350));
 }
 const newItem = document.getElementById('newItem');
-function addNew() { const v = newItem.value.trim(); if (!v) return; addIdeals([v]); newItem.value = ''; }
+let adding = false;
+async function addNew() {
+  const v = newItem.value.trim();
+  if (!v || adding) return;
+  adding = true;
+  try {
+    const [m] = await findSimilar([v], ideals);
+    if (!m) { addIdeals([v]); newItem.value = ''; return; }
+    const buttons = [{ label: '확인' }];
+    if (!m.exact) buttons.push({ label: '그래도 등록', onClick: () => { ideals.push(v); saveIdeals(); renderList(); newItem.value = ''; } });
+    showPopup({ title: '비슷한 이상형이 이미 있어요', lines: [m.text], buttons });
+  } finally {
+    adding = false;
+  }
+}
 document.getElementById('addItem').addEventListener('click', addNew);
 newItem.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) addNew(); });
 renderList();

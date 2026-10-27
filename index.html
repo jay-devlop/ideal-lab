@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이상형</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="common/style.css?v=29">
 </head>
 <body>
 <h1>이상형</h1>
@@ -43,18 +43,14 @@
     <div class="stage" id="stage"></div>
   </div>
 </section>
-<div class="modal" id="confirm" hidden>
-  <div class="dialog">
-    <p class="dq">삭제하시겠습니까?</p>
-    <p class="dnote">복구가 되지 않습니다.</p>
-    <div class="dbtns"><button id="cNo">취소</button><button id="cYes" class="danger">삭제</button></div>
-  </div>
-</div>
+<div class="modal" id="popup" hidden><div class="dialog"></div></div>
 <input type="file" id="file" accept="image/*" multiple hidden>
-<script src="gujeolpan.js?v=26"></script>
-<script src="list.js?v=26"></script>
-<script src="gamelist.js?v=26"></script>
-<script src="game.js?v=26"></script>
-<script src="main.js?v=26"></script>
+<script src="pages/gujeolpan/gujeolpan.js?v=29"></script>
+<script src="common/popup.js?v=29"></script>
+<script src="ai/dedupe.js?v=29"></script>
+<script src="pages/list/list.js?v=29"></script>
+<script src="data/gamelist.js?v=29"></script>
+<script src="pages/game/game.js?v=29"></script>
+<script src="common/main.js?v=29"></script>
 </body>
 </html>
