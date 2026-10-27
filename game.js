@@ -3,6 +3,11 @@ const stageEl = document.getElementById('stage');
 const countEl = document.getElementById('qCount');
 let G = null;
 
+// 문항 수 선택지: 10 단위로 gamelist의 문제 수까지 (마지막은 전체)
+countEl.innerHTML = '';
+for (let n = 10; n <= QS.length; n += 10) countEl.add(new Option(n, n));
+if (QS.length % 10) countEl.add(new Option(QS.length, QS.length));
+
 function h(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -28,7 +33,7 @@ function gameStart() {
   const nav = h('div', 'gnav');
   const prev = h('button', '', '\u2190');
   const next = h('button', '', '\u2192');
-  prev.onclick = () => G.k > 0 && !G.busy && go(G.k - 1, 'prev');
+  prev.onclick = () => G.k > 0 && G.k < G.qs.length && !G.busy && go(G.k - 1, 'prev');
   next.onclick = () => G.k < G.qs.length && G.ans[G.k] != null && !G.busy && go(G.k + 1, 'next');
   nav.append(prev, next);
   stageEl.append(prog, view, nav);
@@ -37,8 +42,14 @@ function gameStart() {
 }
 
 function go(k, dir) {
-  G.k = k;
   const n = G.qs.length;
+  let notice = false;
+  if (k >= n) {
+    // 아직 고르지 않은 문항이 있으면 그 문항으로 돌아가고, 모두 골라야 종료할 수 있음
+    const miss = G.qs.findIndex((q, i) => G.ans[i] == null);
+    if (miss >= 0) { k = miss; dir = 'prev'; notice = true; }
+  }
+  G.k = k;
   const slide = h('div', 'slide');
   if (k < n) {
     const q = G.qs[k];
@@ -50,17 +61,20 @@ function go(k, dir) {
     });
     pair.append(boxes[0], h('span', 'gvs', 'VS'), boxes[1]);
     slide.appendChild(pair);
-    G.prog.textContent = (k + 1) + ' / ' + n;
+    G.prog.textContent = (k + 1) + ' / ' + n + (notice ? ' · 아직 고르지 않은 문항이에요' : '');
   } else {
-    slide.append(h('p', 'gend', '끝! ' + n + '문항 중 ' + G.ans.filter(a => a != null).length + '개를 골랐어요'));
     const acts = h('div', 'gacts');
     const again = h('button', '', '다시 하기');
     again.onclick = gameReset;
-    const send = h('button', '', '이상형리스트로 넘기기');
+    const send = h('button', '', '이상형 리스트로 넘기기');
     send.onclick = sendToList;
-    acts.append(again, h('i', '', '|'), send);
-    slide.appendChild(acts);
-    G.prog.textContent = '완료';
+    acts.append(again, send);
+    const done = h('img', 'gdone');
+    done.src = 'icon/complete_ccc.png';
+    done.alt = '완료';
+    slide.classList.add('end');
+    slide.append(done, acts);
+    G.prog.textContent = '';
   }
   const old = G.cur;
   if (old) {
@@ -70,7 +84,7 @@ function go(k, dir) {
   if (dir !== 'none') slide.classList.add(dir === 'prev' ? 'inL' : 'inR');
   G.view.appendChild(slide);
   G.cur = slide;
-  G.prev.disabled = k === 0;
+  G.prev.disabled = k === 0 || k >= n;
   G.next.disabled = k >= n || G.ans[k] == null;
 }
 

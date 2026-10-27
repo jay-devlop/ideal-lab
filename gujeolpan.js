@@ -71,7 +71,7 @@ cells.forEach((c, i) => {
   t.textContent = i + 1;
   if (i === 4) {
     const lb = el('text', {
-      'text-anchor': 'middle', y: 32, 'font-size': 11,
+      'text-anchor': 'middle', y: 60, 'font-size': 20,
       'font-weight': 700, fill: '#999', 'font-family': 'Noto Sans KR, sans-serif'
     }, badge);
     lb.textContent = '최애';

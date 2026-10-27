@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이상형</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=26">
 </head>
 <body>
 <h1>이상형</h1>
@@ -36,7 +36,7 @@
   <div class="gamewrap">
     <div class="gbar">
       <label>문항 수
-        <select id="qCount"><option value="10">10</option><option value="20">20</option><option value="30">30</option></select>
+        <select id="qCount"></select>
       </label>
       <button id="gStart">게임 시작 &rarr;</button>
     </div>
@@ -46,15 +46,15 @@
 <div class="modal" id="confirm" hidden>
   <div class="dialog">
     <p class="dq">삭제하시겠습니까?</p>
-    <p class="dnote">복구 안 됨.</p>
+    <p class="dnote">복구가 되지 않습니다.</p>
     <div class="dbtns"><button id="cNo">취소</button><button id="cYes" class="danger">삭제</button></div>
   </div>
 </div>
 <input type="file" id="file" accept="image/*" multiple hidden>
-<script src="gujeolpan.js"></script>
-<script src="list.js"></script>
-<script src="gamelist.js"></script>
-<script src="game.js"></script>
-<script src="main.js"></script>
+<script src="gujeolpan.js?v=26"></script>
+<script src="list.js?v=26"></script>
+<script src="gamelist.js?v=26"></script>
+<script src="game.js?v=26"></script>
+<script src="main.js?v=26"></script>
 </body>
 </html>
