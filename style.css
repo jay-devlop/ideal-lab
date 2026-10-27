@@ -1,0 +1,86 @@
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:#111;font-family:'Noto Sans KR',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 0;height:100vh;overflow:hidden}
+h1{font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-0.02em;text-align:center}
+.pane{flex:1;min-height:0;width:100%;display:none;flex-direction:column;align-items:center}
+.pane.active{display:flex}
+.sub{color:#999;font-size:10.5px;margin:0 0 6px;text-align:center;line-height:1.5}
+.empty{color:#999;font-size:13px;margin-top:40px}
+.scroll{overflow-y:auto;width:100%;max-width:480px;padding-bottom:16px}
+.list{list-style:none;margin:16px 0 0;padding:0;width:100%}
+.list li{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #eee;font-size:14px}
+.list li span{flex:1;word-break:keep-all}
+.list li button{padding:3px 8px;border-color:#ccc;color:#777}
+.addrow{display:flex;gap:6px;width:100%;margin-top:12px}
+.addrow input{flex:1;font-family:inherit;font-size:14px;padding:8px 10px;border:1px solid #111;border-radius:0;min-width:0}
+.tabs{display:flex;width:calc(100% + 32px);margin:0 -16px;flex:none;border-top:1px solid #111}
+.tab{flex:1;padding:14px 0;font-size:14px;font-weight:700;border:0;border-right:1px solid #ccc;background:#e4e4e4;color:#aaa;box-shadow:inset 0 4px 6px -4px rgba(0,0,0,.25)}
+.tab:last-child{border-right:0}
+.tab:hover{background:#e4e4e4}
+.tab.active{background:#fff;color:#111;box-shadow:none}
+.board{--s:min(92vw,calc(100vh - 290px),560px);width:var(--s);height:var(--s);margin:4px 0 12px;flex:none}
+.board svg{width:100%;height:100%;display:block;overflow:visible}
+.cell{cursor:pointer;touch-action:none}
+.cell .bg{fill:#fff}
+.cell:hover .bg{fill:#f2f2f2}
+.bar{--s:min(92vw,560px);display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:center;width:var(--s,min(92vw,560px))}
+.status{font-size:13px;color:#555;width:100%;text-align:center}
+button{font-family:inherit;font-size:12px;background:#fff;color:#111;border:1px solid #111;padding:7px 14px;cursor:pointer}
+button:hover{background:#eee}
+button:focus-visible{outline:2px solid #888;outline-offset:2px}
+
+.listwrap{flex:1;min-height:0;width:100%;max-width:480px;display:flex;flex-direction:column;padding-bottom:12px}
+.listwrap .addrow{margin-top:4px;flex:none}
+.listwrap .addrow input{border:1px solid #ccc;border-radius:8px;outline:none}
+.listwrap .addrow input:focus{border-color:#111}
+.listwrap .addrow button{border-radius:8px;white-space:nowrap}
+.ibox{flex:1;min-height:0;margin-top:12px;border:1px solid #ccc;border-radius:8px;overflow-y:auto;padding:6px 14px}
+.ibox .empty{margin:30px 0;text-align:center}
+.ilist{list-style:none;margin:0;padding:0}
+.irow{display:flex;align-items:center;gap:10px;padding:11px 0;font-size:14px;color:#111}
+.irow+.irow{border-top:1px solid #f0f0f0}
+.irow .chk{flex:none;width:5px;height:5px;margin:0 3px;border-radius:50%;background:#111}
+.irow .txt{flex:1;word-break:keep-all}
+.irow input{flex:1;min-width:0;font-family:inherit;font-size:14px;padding:4px 6px;border:1px solid #111;border-radius:4px}
+.irow .acts{flex:none;font-size:12px;color:#999}
+.irow .acts button{border:0;background:none;padding:2px 4px;font-size:12px;color:#999}
+.irow .acts button:hover{background:none;color:#555}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:10}
+.modal[hidden]{display:none}
+.dialog{background:#fff;border-radius:10px;padding:22px 20px 0;width:min(280px,80vw);text-align:center;overflow:hidden}
+.dq{margin:0;font-size:15px;font-weight:700}
+.dnote{margin:6px 0 18px;font-size:11px;color:#999}
+.dbtns{display:flex;margin:0 -20px;border-top:1px solid #eee}
+.dbtns button{flex:1;border:0;background:none;padding:13px 0;font-size:14px;color:#111}
+.dbtns button+button{border-left:1px solid #eee}
+.dbtns button.danger{color:#e53935}
+.gamewrap{flex:1;min-height:0;width:100%;max-width:480px;display:flex;flex-direction:column;padding-bottom:12px}
+.gbar{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px;font-size:13px}
+.gbar select{font-family:inherit;font-size:13px;padding:6px 8px;border:1px solid #ccc;border-radius:8px;background:#fff;margin-left:6px}
+.gbar button{border-radius:8px;margin-left:auto}
+.stage{flex:1;min-height:0;margin-top:14px;display:flex;flex-direction:column}
+.gprog{flex:none;text-align:center;font-size:12px;color:#777}
+.gview{flex:1;min-height:0;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.slide.inR{animation:inR .3s ease both}
+.slide.outL{animation:outL .3s ease both}
+.slide.inL{animation:inL .3s ease both}
+.slide.outR{animation:outR .3s ease both}
+@keyframes inR{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+@keyframes outL{to{transform:translateX(-100%);opacity:0}}
+@keyframes inL{from{transform:translateX(-100%);opacity:0}to{transform:none;opacity:1}}
+@keyframes outR{to{transform:translateX(100%);opacity:0}}
+.pair{display:flex;align-items:center;gap:8px;width:100%}
+.gbox{flex:1;min-height:180px;padding:14px 10px;font-size:15px;line-height:1.5;word-break:keep-all;border-radius:8px}
+.gbox.chosen{background:#111;color:#fff}
+.gvs{flex:none;font-size:12px;font-weight:700;color:#999}
+.gnav{flex:none;display:flex;justify-content:space-between}
+.gnav button{border:0;background:none;font-size:22px;padding:4px 14px;color:#111}
+.gnav button:hover{background:none}
+.gnav button:disabled{color:#ccc;cursor:default}
+.gend{font-size:15px;font-weight:700;text-align:center;margin:0}
+.gendsub{font-size:12px;color:#777;margin:-8px 0 0;text-align:center}
+.gacts{display:flex;align-items:center;gap:12px}
+.gacts button{border-radius:8px}
+.gacts i{color:#ccc;font-style:normal}
+.irow.new{animation:pop .4s ease both}
+@keyframes pop{from{opacity:0;transform:translateY(8px);background:#fff6d6}to{opacity:1;transform:none}}
