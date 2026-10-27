@@ -12,10 +12,10 @@ h1{font-size:22px;font-weight:700;margin:0;padding:60px 0;flex:none;letter-spaci
 .list li button{padding:3px 8px;border-color:#ccc;color:#777}
 .addrow{display:flex;gap:6px;width:100%;margin-top:12px}
 .addrow input{flex:1;font-family:inherit;font-size:14px;padding:10.5px 10px;border:1px solid #111;border-radius:0;min-width:0}
-.tabs{display:flex;width:100%;margin:0;flex:none;border-bottom:1px solid #111;margin-bottom:50px}
+.tabs{display:flex;align-items:flex-end;width:100%;margin:0;flex:none;border-bottom:1px solid #111;margin-bottom:50px}
 .tab{flex:1;padding:17px 0;border-radius: 0 0;font-size:13px;font-weight:700;border:1px solid transparent;background:#e4e4e4;color:#aaa;box-shadow:inset 0 4px 6px -4px rgba(0,0,0,.25)}
 .tab:hover{background:#e4e4e4}
-.tab.active{background:#fff;color:#111;box-shadow:none;border-color:#ddd}
+.tab.active{position:relative;z-index:1;background:#fff;color:#111;border-color:#ddd;border-bottom-color:#fff;margin-bottom:-1px;padding-top:19px;padding-bottom:17px;box-shadow:0 -3px 8px -2px rgba(0,0,0,.14)}
 .board{--s:min(92vw,max(220px,calc(100vh - 450px)),700px);width:var(--s);height:var(--s);margin:0 0 28px;flex:none}
 .board svg{width:100%;height:100%;display:block;overflow:visible}
 .cell{cursor:pointer;touch-action:none}
@@ -83,7 +83,7 @@ button:focus-visible{outline:2px solid #888;outline-offset:2px}
 .irow.new{animation:pop .4s ease both}
 @keyframes pop{from{opacity:0;transform:translateY(8px);background:#fff6d6}to{opacity:1;transform:none}}
 @media (max-width:700px){body{padding:0 16px 30px}}
-#pick,#save{position:relative;top:5px;font-size:12.6px;padding:7.35px 14.7px}
+#pick,#save,#pick2,#save2{position:relative;top:5px;font-size:12.6px;padding:7.35px 14.7px}
 .gdone{width:50px;height:50px;display:block}
 .slide.end{gap:105px;padding-bottom:35px}
 .dialog.nobtn{padding-bottom:24px}
@@ -92,3 +92,26 @@ button:focus-visible{outline:2px solid #888;outline-offset:2px}
 .dlines+.dnote{margin-top:12px}
 .dbar{height:6px;margin-top:16px;border-radius:3px;background:#eee;overflow:hidden}
 .dbar i{display:block;height:100%;width:0;background:#999;transition:width .2s}
+#pane-game{-webkit-user-select:none;user-select:none}
+.cupid{position:fixed;right:0;bottom:30px;width:86.4px;height:auto;pointer-events:none;opacity:0;transition:opacity .25s}
+.cupid.show{opacity:1;pointer-events:auto;cursor:pointer}
+.rococo{position:fixed;inset:0;z-index:20;overflow:hidden;background:#d9cfc0;--bw:max(100vw,calc(100vh * 1.7769));--cw:calc(var(--bw) * .1215);--sw:calc(var(--bw) * .096);--gap:24px}
+/* 배경은 화면을 꽉 채우며 잘리고, 천사·백조는 참고 이미지와 같은 모서리 위치에 붙어 항상 보임 */
+.rbg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:max(100vw,calc(100vh * 1.7769));aspect-ratio:1672/941;background:url(../vintage/rococo_bg.png) center/100% 100% no-repeat;pointer-events:none}
+.rcupid{position:absolute;pointer-events:none;width:var(--cw);left:calc(var(--cw) * -.107 + var(--gap));top:calc(var(--cw) * -.0116 + var(--gap))}
+.rswan{position:absolute;pointer-events:none;width:var(--sw);right:var(--gap);bottom:calc(var(--sw) * -.299 + var(--gap))}
+.rstage{position:relative;z-index:1;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.rococo[hidden]{display:none}
+.rococo #rococoBack{position:absolute;left:90px;bottom:30px;border:0;background:none;font-size:22px;padding:4px 14px;color:#999}
+.rococo #rococoBack:hover{background:none;color:#777}
+.rococo .board{--fw:min(68vw,calc((100vh - 170px) * 1.2585));position:relative;flex:none;width:calc(var(--fw) * 1172 / 1407);height:calc(var(--fw) * 865 / 1407);margin:calc(var(--fw) * .09) 0 calc(var(--fw) * .092)}
+.rococo .bar{row-gap:32px}
+.rococo .board svg{position:relative;-webkit-mask:url(../vintage/frame_hole.png) center/100% 100% no-repeat;mask:url(../vintage/frame_hole.png) center/100% 100% no-repeat}
+.rococo .frame{position:absolute;pointer-events:none;width:var(--fw);left:calc(var(--fw) * -116 / 1407);top:calc(var(--fw) * -125 / 1407)}
+.gold .status{color:#b8860b}
+.gold button:not(#rococoBack){border-color:#b8860b;color:#b8860b;background:rgba(255,255,255,.85)}
+.gold button:not(#rococoBack):hover{background:#fff}
+/* 모바일·세로 화면: 액자를 화면 너비에 맞춰 키움 (배경은 항상 화면을 꽉 채우고 가장자리는 잘림) */
+@media (max-aspect-ratio: 1/1), (max-width: 700px) {
+  .rococo .board{--fw:min(86vw,calc((100vh - 220px) * 1.2585))}
+}

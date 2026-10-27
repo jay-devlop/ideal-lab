@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>이상형</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="common/style.css?v=29">
+<link rel="stylesheet" href="common/style.css?v=71">
 </head>
 <body>
+<img class="cupid" src="vintage/cupid_back.png" alt="">
 <h1>이상형</h1>
 <nav class="tabs">
   <button class="tab active" data-pane="pane-make">구절판 만들기</button>
@@ -15,7 +16,7 @@
   <button class="tab" data-pane="pane-game">밸런스게임</button>
 </nav>
 <section class="pane active" id="pane-make">
-<p class="sub">번호를 클릭해 선택하고, 한 번 더 클릭하면 사진을 고릅니다. 붙여넣기(⌘+V)·파일 끌어놓기도 가능해요.<br>사진: 드래그로 위치, 휠로 크기, 꾹 누른 뒤 끌면 다른 번호로 이동, Delete로 삭제</p>
+<p class="sub">번호를 클릭해 선택하고, 한 번 더 클릭하여 사진을 고릅니다.<br>휠로 크기 조절, 복사붙여넣기, Delete로 삭제 가능</p>
 <div class="board"><svg id="board" viewBox="0 0 676 676"></svg></div>
 <div class="bar">
   <div class="status" id="status"></div>
@@ -44,13 +45,29 @@
   </div>
 </section>
 <div class="modal" id="popup" hidden><div class="dialog"></div></div>
+<section class="rococo gold" id="rococo" hidden>
+  <div class="rbg"></div>
+  <img class="rcupid" src="vintage/cupid.png" alt="">
+  <img class="rswan" src="vintage/swan.png" alt="">
+  <div class="rstage">
+  <div class="board"><svg id="board2" viewBox="0 0 676 676"></svg><img class="frame" src="vintage/frame_open.png" alt=""></div>
+  <div class="bar">
+    <div class="status" id="status2"></div>
+    <button id="pick2">사진 업로드</button>
+    <button id="save2">구절판 저장</button>
+  </div>
+  <input type="file" id="file2" accept="image/*" multiple hidden>
+  </div>
+  <button id="rococoBack" aria-label="돌아가기">&larr;</button>
+</section>
 <input type="file" id="file" accept="image/*" multiple hidden>
-<script src="pages/gujeolpan/gujeolpan.js?v=29"></script>
-<script src="common/popup.js?v=29"></script>
-<script src="ai/dedupe.js?v=29"></script>
-<script src="pages/list/list.js?v=29"></script>
-<script src="data/gamelist.js?v=29"></script>
-<script src="pages/game/game.js?v=29"></script>
-<script src="common/main.js?v=29"></script>
+<script src="pages/gujeolpan.js?v=71"></script>
+<script src="common/popup.js?v=71"></script>
+<script src="ai/dedupe.js?v=71"></script>
+<script src="pages/list.js?v=71"></script>
+<script src="data/gamelist.js?v=71"></script>
+<script src="pages/game.js?v=71"></script>
+<script src="common/main.js?v=71"></script>
+<script src="pages/rococo.js?v=71"></script>
 </body>
 </html>
