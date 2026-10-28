@@ -9,11 +9,15 @@
 세 개의 탭으로 구성되어 있습니다.
 
 - **구절판 만들기**: 9칸에 사진을 넣어 나만의 구절판을 만들고 PNG로 저장합니다.
-  - 번호를 클릭해 선택하고, 한 번 더 클릭하면 사진을 고릅니다. 붙여넣기(⌘+V)와 파일 끌어놓기도 됩니다.
-  - 사진은 드래그로 위치, 휠로 크기를 조절합니다. 꾹 누른 뒤 끌면 다른 번호로 이동하고, Delete로 삭제합니다.
+  - 번호를 클릭해 선택하고, 한 번 더 클릭하여 사진을 고릅니다.
+  - 휠로 크기 조절, 복사붙여넣기, Delete로 삭제할 수 있습니다. 파일 끌어놓기와 사진 드래그(위치 조정), 꾹 누른 뒤 끌어 다른 번호로 이동하는 것도 됩니다.
 - **이상형 리스트**: 이상형을 한 문장씩 등록하고 수정·삭제합니다. 리스트는 브라우저별 ID로 서버에 저장됩니다.
 - **밸런스게임**: 문항 수(10 단위, 최대 전체)를 고르고 두 선택지 중 하나를 고릅니다. 이전/다음 화살표로 돌아가 답을 바꿀 수 있고, 모두 고르면 선택한 문장을 이상형 리스트로 넘길 수 있습니다.
   - 같은 주제(전 애인, 바람, 연락 등)가 연달아 나오지 않게 섞습니다.
+
+### 이스터에그
+
+숨겨진 이스터에그가 있습니다. 찾아보세요!
 
 ### 비슷한 문장 감지
 
@@ -41,11 +45,15 @@ A web page for building your ideal type as a nine-cell board (a *gujeolpan*), pi
 Three tabs:
 
 - **Make the board (구절판 만들기)**: Put photos into nine cells and save the result as a PNG.
-  - Click a number to select it; click again to choose a photo. Pasting (⌘+V) and drag-and-drop files also work.
-  - Drag a photo to reposition it and use the mouse wheel to zoom. Press and hold, then drag to move it to another cell. Press Delete to remove it.
+  - Click a number to select it; click again to choose a photo.
+  - Use the mouse wheel to zoom, copy and paste to add photos, and Delete to remove one. Dropping files, dragging a photo to reposition it, and pressing and holding then dragging to move it to another cell also work.
 - **Ideal type list (이상형 리스트)**: Add ideal types one sentence at a time, then edit or delete them. The list is saved on the server under a per-browser ID.
 - **Balance game (밸런스게임)**: Choose the number of questions (in steps of 10, up to all of them) and pick one of two options each time. The arrows let you go back and change an answer. When every question is answered, you can send your picks to the ideal type list.
   - Questions are shuffled so the same topic (ex-partners, cheating, contact, etc.) does not appear back to back.
+
+### Easter egg
+
+There is a hidden easter egg. Try to find it!
 
 ### Similar sentence detection
 
