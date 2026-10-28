@@ -3,10 +3,10 @@ const stageEl = document.getElementById('stage');
 const countEl = document.getElementById('qCount');
 let G = null;
 
-// 문항 수 선택지: 10 단위로 gamelist의 문제 수까지 (마지막은 전체)
+// 문항 수 선택지: 10 단위로 최대 130문항까지 (gamelist가 더 적으면 그 수까지)
+const MAX_Q = 130;
 countEl.innerHTML = '';
-for (let n = 10; n <= QS.length; n += 10) countEl.add(new Option(n, n));
-if (QS.length % 10) countEl.add(new Option(QS.length, QS.length));
+for (let n = 10; n <= Math.min(MAX_Q, QS.length); n += 10) countEl.add(new Option(n, n));
 
 function h(tag, cls, text) {
   const e = document.createElement(tag);
@@ -53,7 +53,7 @@ function gameReset() {
 }
 
 function gameStart() {
-  const n = Math.min(+countEl.value, QS.length);
+  const n = Math.min(+countEl.value, MAX_Q, QS.length);
   G = { qs: pickQuestions(n), ans: [], k: 0, busy: false };
   stageEl.innerHTML = '';
   const prog = h('div', 'gprog');
